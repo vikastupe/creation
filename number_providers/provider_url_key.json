@@ -1,0 +1,10 @@
+{
+    "5sim": {
+        "api_url": "https://5sim.net/v1", 
+        "api_key": "eyJhbGciOiJSUzUxMiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NjU2OTk3MzgsImlhdCI6MTczNDE2MzczOCwicmF5IjoiMTc0ZDEyODNhM2ZiNTYzMTI5ZDg5YWEzZTRiNjJjMGIiLCJzdWIiOjI4OTU0OTF9.1uY7hVyxcm4f98BYr7DO8ZXelxDAb_5rY3FwmtIKWhI6q1fpKuKlO_pL3RuyBEW-LRhwS6RkBrl6m0DmGkP39oAZs-jFeRj1dBngNhPXx1ONSJzVsoASPV0RxSSwTnNRGO6lrx3RA8dIYFqxUHLABE933RuFfiPpF14FIVhKUppTXerIpkZRt1JPwMftZIJlbFD930aqGhEQwz10IzVPQrmNZoJTlVhvIH29EyLu4fFSZHgefeewJJiKXgmmCISuca34w_45t4gS09fNtTWxxnCvGgamPftPUIwu599XlLDUTs20qMdKGALbvAJscfo-rHxRAMBMz9PM83q0DZfdXg"
+    },
+    "sms_activation_service": {
+        "api_url": "https://sms-activation-service.pro",
+        "api_key": "e7981c679393a85284ac0ad45f0d222b"
+    }
+}

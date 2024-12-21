@@ -1,0 +1,88 @@
+import requests
+
+# Replace with your API keys
+API_KEYS = {
+    "onlinesim": "YOUR_ONLINESIM_API_KEY",
+    "5sim": "YOUR_5SIM_API_KEY",
+    "sms_man": "YOUR_SMS_MAN_API_KEY",
+    "grizzlysms": "YOUR_GRIZZLYSMS_API_KEY",
+    "smspva": "YOUR_SMSPVA_API_KEY",
+}
+
+def purchase_number(service, country, operator, product):
+    try:
+        if service == "onlinesim":
+            url = f"https://onlinesim.io/api/getNum.php?apikey={API_KEYS['onlinesim']}&country={country}&service={product}"
+        elif service == "5sim":
+            url = f"https://5sim.net/api/user/buy/activation?country={country}&operator={operator}&product={product}"
+            headers = {"Authorization": f"Bearer {API_KEYS['5sim']}"}
+        elif service == "sms_man":
+            url = f"https://sms-man.com/api/activation?apiKey={API_KEYS['sms_man']}&country={country}&operator={operator}&product={product}"
+        elif service == "grizzlysms":
+            url = f"https://grizzlysms.com/api/buy?apiKey={API_KEYS['grizzlysms']}&country={country}&operator={operator}&product={product}"
+        elif service == "smspva":
+            url = f"https://smspva.com/api/buy?apiKey={API_KEYS['smspva']}&country={country}&operator={operator}&product={product}"
+        else:
+            return {"error": "Service not supported."}
+
+        response = requests.post(url, headers=headers if service == "5sim" else None, timeout=10)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        return {"error": str(e)}
+
+def complete_order(service, order_id):
+    try:
+        if service == "onlinesim":
+            url = f"https://onlinesim.io/api/setOperationOk.php?apikey={API_KEYS['onlinesim']}&tzid={order_id}"
+        elif service == "5sim":
+            url = f"https://5sim.net/api/user/finish/{order_id}"
+            headers = {"Authorization": f"Bearer {API_KEYS['5sim']}"}
+        elif service == "sms_man":
+            url = f"https://sms-man.com/api/finish?apiKey={API_KEYS['sms_man']}&orderId={order_id}"
+        elif service == "grizzlysms":
+            url = f"https://grizzlysms.com/api/finish?apiKey={API_KEYS['grizzlysms']}&orderId={order_id}"
+        elif service == "smspva":
+            url = f"https://smspva.com/api/finish?apiKey={API_KEYS['smspva']}&orderId={order_id}"
+        else:
+            return {"error": "Service not supported."}
+
+        response = requests.post(url, headers=headers if service == "5sim" else None, timeout=10)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        return {"error": str(e)}
+
+def cancel_order(service, order_id):
+    try:
+        if service == "onlinesim":
+            url = f"https://onlinesim.io/api/setOperationRevise.php?apikey={API_KEYS['onlinesim']}&tzid={order_id}"
+        elif service == "5sim":
+            url = f"https://5sim.net/api/user/cancel/{order_id}"
+            headers = {"Authorization": f"Bearer {API_KEYS['5sim']}"}
+        elif service == "sms_man":
+            url = f"https://sms-man.com/api/cancel?apiKey={API_KEYS['sms_man']}&orderId={order_id}"
+        elif service == "grizzlysms":
+            url = f"https://grizzlysms.com/api/cancel?apiKey={API_KEYS['grizzlysms']}&orderId={order_id}"
+        elif service == "smspva":
+            url = f"https://smspva.com/api/cancel?apiKey={API_KEYS['smspva']}&orderId={order_id}"
+        else:
+            return {"error": "Service not supported."}
+
+        response = requests.post(url, headers=headers if service == "5sim" else None, timeout=10)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        return {"error": str(e)}
+
+# Example usage:
+response = purchase_number("5sim", "usa", "any", "telegram")
+print(response)
+
+order_id = response.get("id")
+if order_id:
+    complete_response = complete_order("5sim", order_id)
+    print(complete_response)
+
+    cancel_response = cancel_order("5sim", order_id)
+    print(cancel_response)
