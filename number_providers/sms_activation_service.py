@@ -1,14 +1,15 @@
 import requests 
 import traceback
 import json
+from global_var import country_mobile_codes
 
 with open(r'number_providers\provider_url_key.json') as f:
     providers = json.loads(f.read())
 
 class SmsActivationService():
-    def __init__(self, proxyip:str=None, proxyport:int=None, proxyuser:str=None, proxypassword:str=None):
+    def __init__(self, api_url, api_key, proxyip=None, proxyport=None,proxyuser=None, proxypassword=None):
         token = ''
-        self.__fixed_url = providers['sms_activation_service']['api_url']+f"/stubs/handler_api?api_key={providers['sms_activation_service']['api_key']}&lang=en&"
+        self.__fixed_url = api_url+f"/stubs/handler_api?api_key={api_key}&lang=en&"
         self.__number_details = None
         self.__headers = {}
         if not proxyip:
@@ -37,7 +38,7 @@ class SmsActivationService():
     def get_balance(self):
         try:
             url = f'{self.__fixed_url}action=getBalance'
-            response = requests.get(url, proxies=self.__proxies, headers=self.__headers)
+            response = requests.get(url, proxies=self.__proxies, headers=self.__headers, timeout=10)
             if response.status_code == 200:
                 data = response.text
                 self.__available_balance = data
@@ -69,13 +70,13 @@ class SmsActivationService():
             
             product = 'mb' # this is for yahoo only
             url = f'{self.__fixed_url}action=getNumber&service={product}&operator={operator}&country={country_id}'
-            response = requests.get(url, proxies=self.__proxies, headers=self.__headers)
+            response = requests.get(url, proxies=self.__proxies, headers=self.__headers, timeout=10)
             if response.status_code == 200:
                 data = response.text
                 print(data)
                 if 'ACCESS_NUMBER' in data:
                     id = data.split(':')[1]
-                    self.phone_number = data.split(':')[2][2:]
+                    self.phone_number = data.split(':')[2].lstrip(country_mobile_codes[country])
                     self.__number_details = {self.phone_number: {'id': id}}
                     return {"status": "success", "phone_number": self.phone_number}
                 else:
@@ -95,12 +96,12 @@ class SmsActivationService():
             id = number_details.get('id', None)
             if id:
                 url = f'{self.__fixed_url}action=getStatus&id={id}'
-                response = requests.get(url, proxies=self.__proxies, headers=self.__headers)
+                response = requests.get(url, proxies=self.__proxies, headers=self.__headers, timeout=10)
                 if response.status_code == 200:
                     data = response.text
-                    print(data)
-                    if 'STATUS_OK' in data:
-                        return {"status": "success", "code": data.split(':')[1]}
+                    print(data)  # STATUS_OK:Yahoo: If anyone asks you for this code, it's a scam. Your 6-digit code is: 604215
+                    if 'STATUS_OK' in data:   
+                        return {"status": "success", "code": data.split(':')[-1]}
                     elif 'STATUS_WAIT_CODE' in data:
                         return {"status": "success", "code": None}
                     else:
@@ -121,7 +122,7 @@ class SmsActivationService():
             id = number_details.get('id', None)
             if id:
                 url = f'{self.__fixed_url}action=setStatus&id={id}&status=6'
-                response = requests.get(url, proxies=self.__proxies, headers=self.__headers)
+                response = requests.get(url, proxies=self.__proxies, headers=self.__headers, timeout=10)
                 if response.status_code == 200:
                     data = response.text
                     if 'ACCESS_ACTIVATION' in data:
@@ -143,7 +144,7 @@ class SmsActivationService():
             id = number_details.get('id', None)
             if id:
                 url = f'{self.__fixed_url}action=setStatus&id={id}&status=8'
-                response = requests.get(url, proxies=self.__proxies, headers=self.__headers)
+                response = requests.get(url, proxies=self.__proxies, headers=self.__headers, timeout=10)
                 if response.status_code == 200:
                     data = response.text
                     if 'ACCESS_CANCEL' == data:

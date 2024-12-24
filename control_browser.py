@@ -48,7 +48,8 @@ class ControlBrowsers:
            
             user_context = browser.new_context(viewport={'width': 1600, 'height': 900},
                                                user_agent=self.__get_random_user_agent(),
-                                               java_script_enabled=True)
+                                               java_script_enabled=True,
+                                               locale='en-US')
 
             return playwright, browser, user_context
         except Exception as e:
@@ -76,10 +77,10 @@ class ControlBrowsers:
             raise Exception("could not open browser")
 
         try:
-            self.page.goto("https://google.com", wait_until="networkidle",timeout=50000)
+            self.page.goto("https://google.com", wait_until="networkidle",timeout=90000)
         except TimeoutError as e:
-            print("could not open google.com in 50 seconds; {e}")
-            raise Exception("could not open google.com in 50 seconds")
+            print("could not open google.com in 90 seconds; {e}")
+            raise Exception("could not open google.com in 90 seconds")
         # except Error as e:
         #     if "ERR_TIMED_OUT" in str(e):
         #         raise Exception("ERR_TIMED_OUT")

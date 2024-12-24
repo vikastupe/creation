@@ -6,12 +6,12 @@ with open(r'number_providers\provider_url_key.json') as f:
     providers = json.loads(f.read())
 
 class Number5Sim():
-    def __init__(self, proxyip:str=None, proxyport:int=None, proxyuser:str=None, proxypassword:str=None):
+    def __init__(self, api_url, api_key, proxyip=None, proxyport=None,proxyuser=None, proxypassword=None):
         token = ''
-        self.__fixed_url = providers['5sim']['api_url']
+        self.__fixed_url = api_url
         self.__number_details = None
         self.__headers = {
-            'Authorization': 'Bearer ' + providers['5sim']['api_key'],
+            'Authorization': 'Bearer ' + api_key,
             'Accept': 'application/json',
         }
         if not proxyip:
@@ -40,7 +40,7 @@ class Number5Sim():
     def get_balance(self):
         try:
             url = f'{self.__fixed_url}/user/profile'
-            response = requests.get(url, proxies=self.__proxies, headers=self.__headers)
+            response = requests.get(url, proxies=self.__proxies, headers=self.__headers, timeout=10)
             if response.status_code == 200:
                 data = response.json()
                 self.__available_balance = data['balance']
@@ -60,7 +60,7 @@ class Number5Sim():
     def get_product_by_country(self, country='usa', product='yahoo'):
         try:
             url = f'{self.__fixed_url}/guest/prices?country={country}&product={product}'
-            response = requests.get(url, proxies=self.__proxies, headers=self.__headers)
+            response = requests.get(url, proxies=self.__proxies, headers=self.__headers, timeout=10)
             if response.status_code == 200:
                 data = dict(response.json())
                 return {"status": "success", "data": data}
@@ -77,15 +77,18 @@ class Number5Sim():
             url = f'{self.__fixed_url}/user/buy/activation/{country.lower()}/{operator.lower()}/{product.lower()}'
             print(url)
             print(self.__headers)
-            response = requests.get(url, proxies=self.__proxies, headers=self.__headers)
+            response = requests.get(url, proxies=self.__proxies, headers=self.__headers, timeout=10)
             if response.status_code == 200:
                 print(response.text)
-                data = dict(response.json())
-                print(data)
-                phone_number = data.pop('phone')
-                self.phone_number = phone_number
-                self.__number_details = {phone_number: data}
-                return {"status": "success", "phone_number": phone_number}
+                if 'no free phones' in response.text:
+                    return {'status': 'failed', 'error': 'no free phones'}
+                else:
+                    data = dict(response.json())
+                    print(data)
+                    phone_number = data.pop('phone')
+                    self.phone_number = phone_number
+                    self.__number_details = {phone_number: data}
+                    return {"status": "success", "phone_number": phone_number}
             else:
                 return {'status': 'failed', 'error': response.text}
      
@@ -99,7 +102,7 @@ class Number5Sim():
             id = number_details.get('id', None)
             if id:
                 url = f'{self.__fixed_url}/user/check/{id}'
-                response = requests.get(url, proxies=self.__proxies, headers=self.__headers)
+                response = requests.get(url, proxies=self.__proxies, headers=self.__headers, timeout=10)
                 if response.status_code == 200:
                     data = dict(response.json())
                     sms = data['sms']
@@ -123,7 +126,7 @@ class Number5Sim():
             id = number_details.get('id', None)
             if id:
                 url = f'{self.__fixed_url}/user/finish/{id}'
-                response = requests.get(url, proxies=self.__proxies, headers=self.__headers)
+                response = requests.get(url, proxies=self.__proxies, headers=self.__headers, timeout=10)
                 if response.status_code == 200:
                     data = dict(response.json())
                     if data['status'] == 'FINISHED':
@@ -144,9 +147,10 @@ class Number5Sim():
             id = number_details.get('id', None)
             if id:
                 url = f'{self.__fixed_url}/user/cancel/{id}'
-                response = requests.get(url, proxies=self.__proxies, headers=self.__headers)
+                response = requests.get(url, proxies=self.__proxies, headers=self.__headers, timeout=10)
                 if response.status_code == 200:
                     data = dict(response.json())
+                    print(data)
                     if data['status'] == 'CANCELED':
                         return {'status':'success', 'msg': 'Order cancelled successfully.'}
                     else:
@@ -162,7 +166,7 @@ class Number5Sim():
     def get_countries_list(self):
         try:
             url = f'{self.__fixed_url}/guest/countries'
-            response = requests.get(url, proxies=self.__proxies, headers=self.__headers)
+            response = requests.get(url, proxies=self.__proxies, headers=self.__headers, timeout=10)
             if response.status_code == 200:
                 data = dict(response.json())
                 print(data)
